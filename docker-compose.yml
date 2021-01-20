@@ -10,18 +10,18 @@ version: '3.7'
 services:
 
   # Reverse Proxy: API Gateway
-  # proxy:
-  #   image: nginx
-  #   volumes:
-  #     - ./conf.d/nginx.conf:/etc/nginx/nginx.conf
-  #   ports: 
-  #     - "80:80"
-  #   restart: always
-  #   # depends_on:
-  #   #   - app-server
-  #   networks:
-  #     - app-front
-  #     - app-back
+  proxy:
+    image: nginx
+    volumes:
+      - ./conf.d/default.conf:/etc/nginx/conf.d/default.conf
+    ports:                                               
+      - "80:80"
+    restart: always
+    depends_on:
+      - app-client
+    networks:
+      - app-front
+      - app-back
   
   # Frontend POLYMER Client Web-Server
   app-client:
@@ -47,8 +47,8 @@ services:
       # /opt/node_app/node_modules location. Thanks to PR from @brnluiz
       - notused:/opt/node_app/app/node_modules
     restart: always
-    # depends_on:
-    #   - app-server
+    depends_on:
+      - app-server
     networks:
       - app-front
 
