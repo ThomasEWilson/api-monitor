@@ -5,14 +5,14 @@ const hmr = process.argv.includes('--hmr');
 
 export default /** @type {import('@web/dev-server').DevServerConfig} */ ({
   nodeResolve: true,
-  open: '/demo/',
+  open: false,
   watch: !hmr,
 
   /** Compile JS for older browsers. Requires @web/dev-server-esbuild plugin */
   // esbuildTarget: 'auto'
 
   /** Set appIndex to enable SPA routing */
-  // appIndex: 'demo/index.html',
+  appIndex: 'index.html',
 
   /** Confgure bare import resolve plugin */
   // nodeResolve: {

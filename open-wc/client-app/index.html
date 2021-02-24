@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>FHIR Health Checker</title>
+
+  <!-- Add support for Web Components to older browsers. -->
+  <script src="./node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <!-- Your application must load the Roboto and Material Icons fonts. -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Material+Icons&display=block" rel="stylesheet">
+  <style>
+    html {
+      /* --mdc-theme-primary: #6200ee;
+      --mdc-theme-secondary: #018786; */
+      --mdc-icon-font: 'Material Icons Outlined';
+    }
+    body {
+      background: #fafafa;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script type="module">
+    import { html, render } from 'lit-html';
+    import './dist/client-app.js';
+    // import '@material/mwc-button';
+
+    const title = 'APP';
+    render(
+      html`
+        <client-app .title=${title}>
+          some more light-dom
+        </client-app>
+      `,
+      document.querySelector('#app')
+    );
+  </script>
+</body>
+</html>

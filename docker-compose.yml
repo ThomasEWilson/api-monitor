@@ -26,9 +26,11 @@ services:
   # Frontend POLYMER Client Web-Server
   app-client:
     container_name: app.thrivefhirhealth.io
+    # image: spring-web-postgres-compose_app-client:latest
     build:
       context: open-wc/client-app # Use an image built from the specified dockerfile in the `client` directory.
     command: npm start
+    init: true
     ports:
       - "1452:8000"
     volumes:
@@ -57,8 +59,9 @@ services:
   app-server:
     # Configuration for building the docker image for the backend service
     container_name: api.thrivefhirhealth.io
-    build:
-      context: api-server/thrive-fhir-health-api # Use an image built from the specified dockerfile in the `polling-app-server` directory.
+    image: spring-web-postgres-compose_app-server:latest
+    # build:
+      # context: api-server/thrive-fhir-health-api # Use an image built from the specified dockerfile in the `polling-app-server` directory.
     ports:
       - "4242:8080" # HOST:CONTAINER
     restart: always
