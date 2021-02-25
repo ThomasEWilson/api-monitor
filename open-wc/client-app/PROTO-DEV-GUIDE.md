@@ -8,15 +8,47 @@ Which css theme variables are used: see `component.ts` css section of each compo
 **MWC Official Demos** component library list w/ description & demo: see [Material Components Official Demos from github.io](https://material-components.github.io/material-components-web-components/demos/)
 **Full-page Demo of entire component library**: see [Material Web Components Playground](https://mwc-demos.glitch.me/)
 
+//* Feature Requests */
+//1. allow us to remove certain endpoints, to only try specific ones. (easy)
+//2. allow us to modify collection variables before run endpoints. (medium-easy)
 
 *<>* syntax refers to MWC Component Classes
 only implementing idempotent requests for MVP.
 
-Reference Syntax:
-<client-app .title=${title}
-            @click=${this.myMethod}>
-</client-app>
-// @click=${this.increment}
+/** Reference Syntax  **/
+    <client-app .title="Mark H"
+                @click=${this.myMethod}>
+    </client-app>
+
+<script type="module">
+    class MyElement extends LitElement {
+        static get properties() {
+            return {
+            message: { type: String },
+            myBool: { type: Boolean },
+            myArray: { type: Array }
+            };
+        }
+        constructor() {
+            super();
+            this.message = 'Hello world! From my-element';
+            this.myBool = true;
+            this.myArray = ['an','array','of','test','data'];
+        }
+        render() {
+            return html`
+            <p>${this.message}</p>
+            <ul>${this.myArray.map(item => html`<li>${item}</li>`)}</ul>
+            ${this.myBool ?
+                html`<p>Render some HTML if myBool is true</p>` :
+                html`<p>Render some other HTML if myBool is false</p>`}
+            `;
+        }
+    }
+</script>
+
+
+/** End Reference Syntax  **/
 
 App {
 

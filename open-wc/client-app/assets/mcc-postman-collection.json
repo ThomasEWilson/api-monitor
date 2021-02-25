@@ -1,0 +1,1394 @@
+{
+	"info": {
+		"_postman_id": "f7de5d69-4920-498a-9a16-34c0be0aa3de",
+		"name": "[CPSI] FHIR Server - Runner",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Bearer Token",
+			"item": [
+				{
+					"name": "Generate System Token",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if(pm.response.code === 200) {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.collectionVariables.set(\"user_token\", jsonData.access_token);\r",
+									"\r",
+									"    pm.sendRequest({\r",
+									"        url: 'https://test.thrivepatientportal.com/auths/oauth/dereference',\r",
+									"        method: 'POST',\r",
+									"        header: {\r",
+									"            'Authorization' : 'Bearer ' + jsonData.access_token,\r",
+									"            'Accept' : '*/*',\r",
+									"            'Cache-Control' : 'no-cache',\r",
+									"            'Accept-Encoding' : 'gzip, deflate',\r",
+									"            'Content-Length' : '0',\r",
+									"            'Connection' : 'keep-alive'\r",
+									"        }\r",
+									"    }, function (err, res) {\r",
+									"        pm.collectionVariables.set(\"bearer_token\", res.text());\r",
+									"    });\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "client_id",
+									"value": "{{system_client_id}}",
+									"type": "text"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "text"
+								},
+								{
+									"key": "response_type",
+									"value": "token",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{system_client_secret}}",
+									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "patient/*.*",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://test.thrivepatientportal.com/oauth/token",
+							"protocol": "https",
+							"host": [
+								"test",
+								"thrivepatientportal",
+								"com"
+							],
+							"path": [
+								"oauth",
+								"token"
+							]
+						},
+						"description": "Creates a system token"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "STU3 MCC GET",
+			"item": [
+				{
+					"name": "Capability/Conformance Statement",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{server}}:{{port}}/fhir/stu3/metadata",
+							"protocol": "http",
+							"host": [
+								"{{server}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"fhir",
+								"stu3",
+								"metadata"
+							]
+						},
+						"description": "Conformance statement that allows apps to discover endpoints and supported actions."
+					},
+					"response": []
+				},
+				{
+					"name": "Patient",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"/**",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 200ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									"",
+									"if(pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    var patientEntry = jsonData.entry[0];",
+									"    ",
+									"    pm.test(\"resourceType is Patient \", function () {",
+									"        pm.expect(patientEntry.resource).to.have.property(\"resourceType\");",
+									"        pm.expect(patientEntry.resource.resourceType).to.eql(data.patientResourceType);",
+									"    });",
+									"}",
+									"*/",
+									"/*",
+									"if(pm.response.code === 200) {",
+									"\tvar jsonData = pm.response.json();",
+									"    ",
+									"\tpm.test(\"resourceType is \" + data.resourceType, function () {",
+									"\t\tpm.expect(jsonData.resourceType).to.eql(data.resourceType);",
+									"\t});",
+									"",
+									"\tpm.test(\"link[0].relation is \" + data.link[0].relation, function () {",
+									"\t\tpm.expect(jsonData.link[0].relation).to.eql(data.link[0].relation);",
+									"\t});",
+									"",
+									"\tpm.test(\"link[0].url is \" + data.link[0].url, function () {",
+									"\t\tpm.expect(jsonData.link[0].url).to.eql(data.link[0].url);",
+									"\t});",
+									"    ",
+									"\tpm.test(\"entry[0].fullUrl is \" + data.entry[0].fullUrl, function () {",
+									"\t\tpm.expect(jsonData.entry[0].fullUrl).to.eql(data.entry[0].fullUrl);",
+									"\t});",
+									"",
+									"\tpm.test(\"entry[0].resource.resourceType is \" + data.entry[0].resource.resourceType, function () {",
+									"\t\tpm.expect(jsonData.entry[0].resource.resourceType).to.eql(data.entry[0].resource.resourceType);",
+									"\t});",
+									"",
+									"\tpm.test(\"entry[0].resource.id is \" + data.entry[0].resource.id, function () {",
+									"\t\tpm.expect(jsonData.entry[0].resource.id).to.eql(data.entry[0].resource.id);",
+									"\t});",
+									"",
+									"\tpm.test(\"entry[0].resource.extension[0].url is \" + data.entry[0].resource.extension[0].url, function () {",
+									"\t\tpm.expect(jsonData.entry[0].resource.extension[0].url).to.eql(data.entry[0].resource.extension[0].url);",
+									"\t});",
+									"",
+									"\tpm.test(\"entry[0].resource.extension[0].valueCodeableConcept.coding[0].system is \" + data.entry[0].resource.extension[0].valueCodeableConcept.coding[0].system, function () {",
+									"\t\tpm.expect(jsonData.entry[0].resource.extension[0].valueCodeableConcept.coding[0].system).to.eql(data.entry[0].resource.extension[0].valueCodeableConcept.coding[0].system);",
+									"\t});",
+									"",
+									"\tpm.test(\"entry[0].resource.extension[0].valueCodeableConcept.coding[0].code is \" + data.entry[0].resource.extension[0].valueCodeableConcept.coding[0].code, function () {",
+									"\t\tpm.expect(jsonData.entry[0].resource.extension[0].valueCodeableConcept.coding[0].code).to.eql(data.entry[0].resource.extension[0].valueCodeableConcept.coding[0].code);",
+									"\t});",
+									"",
+									"\tpm.test(\"entry[0].resource.extension[0].valueCodeableConcept.coding[0].display is \" + data.entry[0].resource.extension[0].valueCodeableConcept.coding[0].display, function () {",
+									"\t\tpm.expect(jsonData.entry[0].resource.extension[0].valueCodeableConcept.coding[0].display).to.eql(data.entry[0].resource.extension[0].valueCodeableConcept.coding[0].display);",
+									"\t});",
+									"",
+									"\tpm.test(\"entry[0].resource.identifier[0].use is \" + data.entry[0].resource.identifier[0].use, function () {",
+									"\t\tpm.expect(jsonData.entry[0].resource.identifier[0].use).to.eql(data.entry[0].resource.identifier[0].use);",
+									"\t});",
+									"",
+									"\tpm.test(\"entry[0].resource.identifier[0].type.coding[0].system is \" + data.entry[0].resource.identifier[0].type.coding[0].system, function () {",
+									"\t\tpm.expect(jsonData.entry[0].resource.identifier[0].type.coding[0].system).to.eql(data.entry[0].resource.identifier[0].type.coding[0].system);",
+									"\t});",
+									"",
+									"\tpm.test(\"entry[0].resource.identifier[0].type.coding[0].code is \" + data.entry[0].resource.identifier[0].type.coding[0].code, function () {",
+									"\t\tpm.expect(jsonData.entry[0].resource.identifier[0].type.coding[0].code).to.eql(data.entry[0].resource.identifier[0].type.coding[0].code);",
+									"\t});",
+									"",
+									"\tpm.test(\"entry[0].resource.identifier[0].system is \" + data.entry[0].resource.identifier[0].system, function () {",
+									"\t\tpm.expect(jsonData.entry[0].resource.identifier[0].system).to.eql(data.entry[0].resource.identifier[0].system);",
+									"\t});",
+									"",
+									"\tpm.test(\"entry[0].resource.identifier[0].value is \" + data.entry[0].resource.identifier[0].value, function () {",
+									"\t\tpm.expect(jsonData.entry[0].resource.identifier[0].value).to.eql(data.entry[0].resource.identifier[0].value);",
+									"\t});",
+									"",
+									"\tpm.test(\"entry[0].resource.identifier[0].assigner.display is \" + data.entry[0].resource.identifier[0].assigner.display, function () {",
+									"\t\tpm.expect(jsonData.entry[0].resource.identifier[0].assigner.display).to.eql(data.entry[0].resource.identifier[0].assigner.display);",
+									"\t});",
+									"",
+									"\tpm.test(\"entry[0].resource.identifier[1].type.coding[0].system is \" + data.entry[0].resource.identifier[1].type.coding[0].system, function () {",
+									"\t\tpm.expect(jsonData.entry[0].resource.identifier[1].type.coding[0].system).to.eql(data.entry[0].resource.identifier[1].type.coding[0].system);",
+									"\t});",
+									"",
+									"\tpm.test(\"entry[0].resource.identifier[1].type.coding[0].code is \" + data.entry[0].resource.identifier[1].type.coding[0].code, function () {",
+									"\t\tpm.expect(jsonData.entry[0].resource.identifier[1].type.coding[0].code).to.eql(data.entry[0].resource.identifier[1].type.coding[0].code);",
+									"\t});",
+									"",
+									"\tpm.test(\"entry[0].resource.identifier[1].system is \" + data.entry[0].resource.identifier[1].system, function () {",
+									"\t\tpm.expect(jsonData.entry[0].resource.identifier[1].system).to.eql(data.entry[0].resource.identifier[1].system);",
+									"\t});",
+									"",
+									"\tpm.test(\"entry[0].resource.identifier[1].value is \" + data.entry[0].resource.identifier[1].value, function () {",
+									"\t\tpm.expect(jsonData.entry[0].resource.identifier[1].value).to.eql(data.entry[0].resource.identifier[1].value);",
+									"\t});",
+									"",
+									"\tpm.test(\"entry[0].resource.active is \" + data.entry[0].resource.active, function () {",
+									"\t\tpm.expect(jsonData.entry[0].resource.active).to.eql(data.entry[0].resource.active);",
+									"\t});",
+									"",
+									"\tpm.test(\"entry[0].resource.name[0].use is \" + data.entry[0].resource.name[0].use, function () {",
+									"\t\tpm.expect(jsonData.entry[0].resource.name[0].use).to.eql(data.entry[0].resource.name[0].use);",
+									"\t});",
+									"",
+									"\tpm.test(\"entry[0].resource.name[0].text is \" + data.entry[0].resource.name[0].text, function () {",
+									"\t\tpm.expect(jsonData.entry[0].resource.name[0].text).to.eql(data.entry[0].resource.name[0].text);",
+									"\t});",
+									"",
+									"\tpm.test(\"entry[0].resource.name[0].family is \" + data.entry[0].resource.name[0].family, function () {",
+									"\t\tpm.expect(jsonData.entry[0].resource.name[0].family).to.eql(data.entry[0].resource.name[0].family);",
+									"\t});",
+									"",
+									"\tpm.test(\"entry[0].resource.name[0].given[0] is \" + data.entry[0].resource.name[0].given[0], function () {",
+									"\t\tpm.expect(jsonData.entry[0].resource.name[0].given[0]).to.eql(data.entry[0].resource.name[0].given[0]);",
+									"\t});",
+									"",
+									"\tpm.test(\"entry[0].resource.name[0].given[1] is \" + data.entry[0].resource.name[0].given[1], function () {",
+									"\t\tpm.expect(jsonData.entry[0].resource.name[0].given[1]).to.eql(data.entry[0].resource.name[0].given[1]);",
+									"\t});",
+									"",
+									"\tpm.test(\"entry[0].resource.telecom[0].system is \" + data.entry[0].resource.telecom[0].system, function () {",
+									"\t\tpm.expect(jsonData.entry[0].resource.telecom[0].system).to.eql(data.entry[0].resource.telecom[0].system);",
+									"\t});",
+									"",
+									"\tpm.test(\"entry[0].resource.telecom[0].value is \" + data.entry[0].resource.telecom[0].value, function () {",
+									"\t\tpm.expect(jsonData.entry[0].resource.telecom[0].value).to.eql(data.entry[0].resource.telecom[0].value);",
+									"\t});",
+									"",
+									"\tpm.test(\"entry[0].resource.gender is \" + data.entry[0].resource.gender, function () {",
+									"\t\tpm.expect(jsonData.entry[0].resource.gender).to.eql(data.entry[0].resource.gender);",
+									"\t});",
+									"",
+									"\tpm.test(\"entry[0].resource.birthDate is \" + data.entry[0].resource.birthDate, function () {",
+									"\t\tpm.expect(jsonData.entry[0].resource.birthDate).to.eql(data.entry[0].resource.birthDate);",
+									"\t});",
+									"",
+									"\tpm.test(\"entry[0].resource.address[0].postalCode is \" + data.entry[0].resource.address[0].postalCode, function () {",
+									"\t\tpm.expect(jsonData.entry[0].resource.address[0].postalCode).to.eql(data.entry[0].resource.address[0].postalCode);",
+									"\t});",
+									"}",
+									"*/"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "scope",
+								"value": "patient/*.*",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json+fhir",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://{{server}}:{{port}}/fhir/stu3/Patient/id-{{spid}}.{{arid}}.{{profile}}",
+							"protocol": "http",
+							"host": [
+								"{{server}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"fhir",
+								"stu3",
+								"Patient",
+								"id-{{spid}}.{{arid}}.{{profile}}"
+							]
+						},
+						"description": "Lookup patient encounts via profile search filter"
+					},
+					"response": []
+				},
+				{
+					"name": "Encounter",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true,
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"name": "Content-Type",
+								"value": "application/xml",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{server}}:{{port}}/fhir/stu3/Encounter?_list=grh&patient=id-{{spid}}.{{arid}}.{{profile}}",
+							"protocol": "http",
+							"host": [
+								"{{server}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"fhir",
+								"stu3",
+								"Encounter"
+							],
+							"query": [
+								{
+									"key": "_list",
+									"value": "grh"
+								},
+								{
+									"key": "patient",
+									"value": "id-{{spid}}.{{arid}}.{{profile}}"
+								},
+								{
+									"key": "patient",
+									"value": "{{grhExternalID}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "AllergyIntolerance",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", \r",
+									"    () => pm.response.to.have.status(200) \r",
+									");\r",
+									"\r",
+									"pm.test(\"JSON Data Validates\", () => {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    console.log(jsonData);\r",
+									"    return true;\r",
+									"    pm.expect(jsonData.value).to.eql(100);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									"// let array = pm.response.json()[\"entry\"];\r",
+									"//         // let foundElements = [];\r",
+									"//         for(let i of array) {\r",
+									"//                 if (i.resource.status == \"entered-in-error\") {\r",
+									"//                     console.log(i.resource);\r",
+									"//                 }\r",
+									"//         }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "scope",
+								"type": "text",
+								"value": "patient/*.*"
+							},
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "application/json+fhir"
+							}
+						],
+						"url": {
+							"raw": "http://{{server}}:{{port}}/fhir/stu3/AllergyIntolerance?_list=grh&patient=id-{{spid}}.{{arid}}.{{profile}}",
+							"protocol": "http",
+							"host": [
+								"{{server}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"fhir",
+								"stu3",
+								"AllergyIntolerance"
+							],
+							"query": [
+								{
+									"key": "_list",
+									"value": "grh"
+								},
+								{
+									"key": "patient",
+									"value": "id-{{spid}}.{{arid}}.{{profile}}"
+								},
+								{
+									"key": "patient",
+									"value": "{{grhExternalID}}",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Lookup patient encounts via profile search filter"
+					},
+					"response": []
+				},
+				{
+					"name": "Appointment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"        let array = pm.response.json()[\"entry\"];\r",
+									"        // let foundElements = [];\r",
+									"        for(let i of array) {\r",
+									"                if (i.resource.status == \"entered-in-error\") {\r",
+									"                    console.log(i.resource);\r",
+									"                }\r",
+									"        }\r",
+									"        // if (foundElements.length)\r",
+									"            // console.log(foundElements);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "scope",
+								"type": "text",
+								"value": "patient/*.*",
+								"disabled": true
+							},
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "application/json+fhir",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://{{server}}:{{port}}/fhir/stu3/Appointment?_list=grh&patient=id-{{spid}}.{{arid}}.{{profile}}",
+							"protocol": "http",
+							"host": [
+								"{{server}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"fhir",
+								"stu3",
+								"Appointment"
+							],
+							"query": [
+								{
+									"key": "_list",
+									"value": "grh"
+								},
+								{
+									"key": "patient",
+									"value": "id-{{spid}}.{{arid}}.{{profile}}"
+								},
+								{
+									"key": "patient",
+									"value": "{{grhExternalID}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Binary",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "scope",
+								"value": "patient/*.*",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json+fhir",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://{{server}}:{{port}}/fhir/stu3/Binary?patient=id-{{spid}}.{{arid}}.{{profile}}",
+							"protocol": "http",
+							"host": [
+								"{{server}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"fhir",
+								"stu3",
+								"Binary"
+							],
+							"query": [
+								{
+									"key": "patient",
+									"value": "id-{{spid}}.{{arid}}.{{profile}}"
+								},
+								{
+									"key": "patient",
+									"value": "{{grhExternalID}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Binary DocGen",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// pm.test(\"JSON Data Validates\", () => {\r",
+									"//     var jsonData = pm.response.json();\r",
+									"//     pm.expect(jsonData.type.coding[0].code).to.eql(\"34133-9\");\r",
+									"//     return true;\r",
+									"// });\r",
+									"\r",
+									"pm.test(\"Decode Encoded\", () => {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    let base64Content = jsonData.content[0].attachment.data\r",
+									"    let intermediate = CryptoJS.enc.Base64.parse(base64Content); // CryptoJS is an inbuilt object, documented here: https://www.npmjs.com/package/crypto-js\r",
+									"    let decodedString = CryptoJS.enc.Utf8.stringify(intermediate);\r",
+									"    pm.globals.set(\"decodedXMLCDA\", decodedString);\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "scope",
+								"type": "text",
+								"value": "patient/*.*",
+								"disabled": true
+							},
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "application/json+fhir",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"value": "text/html",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://{{server}}:{{port}}/fhir/stu3/Binary/$generate-ccda-mcc?encounter=id-{{arid}}.{{visit}}",
+							"protocol": "http",
+							"host": [
+								"{{server}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"fhir",
+								"stu3",
+								"Binary",
+								"$generate-ccda-mcc"
+							],
+							"query": [
+								{
+									"key": "encounter",
+									"value": "id-{{arid}}.{{visit}}"
+								},
+								{
+									"key": "patient",
+									"value": "id-{{spid}}.{{arid}}.{{profile}}",
+									"disabled": true
+								},
+								{
+									"key": "patient",
+									"value": "{{grhExternalID}}",
+									"disabled": true
+								},
+								{
+									"key": "exclusion-type",
+									"value": "medical_record",
+									"disabled": true
+								},
+								{
+									"key": "exclusion-type",
+									"value": "patient",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CarePlan",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Text Generated\", () => {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    let div = jsonData.entry[0].resource.text.div\r",
+									"    pm.globals.set(\"cpDIV\", div);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/xml",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "ApplicationId",
+								"value": "7c90306a-5771-4e53-9048-23cb55e39090",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://{{server}}:{{port}}/fhir/stu3/CarePlan?_list=grh&patient=id-{{spid}}.{{arid}}.{{profile}}",
+							"protocol": "http",
+							"host": [
+								"{{server}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"fhir",
+								"stu3",
+								"CarePlan"
+							],
+							"query": [
+								{
+									"key": "_list",
+									"value": "grh"
+								},
+								{
+									"key": "patient",
+									"value": "id-{{spid}}.{{arid}}.{{profile}}"
+								},
+								{
+									"key": "patient",
+									"value": "{{grhExternalID}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CareTeam",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{server}}:{{port}}/fhir/stu3/CareTeam?_list=grh&patient=id-{{spid}}.{{arid}}.{{profile}}",
+							"protocol": "http",
+							"host": [
+								"{{server}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"fhir",
+								"stu3",
+								"CareTeam"
+							],
+							"query": [
+								{
+									"key": "_list",
+									"value": "grh"
+								},
+								{
+									"key": "patient",
+									"value": "id-{{spid}}.{{arid}}.{{profile}}"
+								},
+								{
+									"key": "patient",
+									"value": "{{grhExternalID}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Condition",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://{{server}}:{{port}}/fhir/stu3/Condition?_list=grh&patient=id-{{spid}}.{{arid}}.{{profile}}",
+							"protocol": "http",
+							"host": [
+								"{{server}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"fhir",
+								"stu3",
+								"Condition"
+							],
+							"query": [
+								{
+									"key": "_list",
+									"value": "grh"
+								},
+								{
+									"key": "patient",
+									"value": "id-{{spid}}.{{arid}}.{{profile}}"
+								},
+								{
+									"key": "patient",
+									"value": "{{grhExternalID}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Device",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{server}}:{{port}}/fhir/stu3/Device?_list=grh&patient=id-{{spid}}.{{arid}}.{{profile}}",
+							"protocol": "http",
+							"host": [
+								"{{server}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"fhir",
+								"stu3",
+								"Device"
+							],
+							"query": [
+								{
+									"key": "_list",
+									"value": "grh"
+								},
+								{
+									"key": "patient",
+									"value": "id-{{spid}}.{{arid}}.{{profile}}"
+								},
+								{
+									"key": "patient",
+									"value": "{{grhExternalID}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DiagnosticReport",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{server}}:{{port}}/fhir/stu3/DiagnosticReport?_list=grh&patient=id-{{spid}}.{{arid}}.{{profile}}",
+							"protocol": "http",
+							"host": [
+								"{{server}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"fhir",
+								"stu3",
+								"DiagnosticReport"
+							],
+							"query": [
+								{
+									"key": "_list",
+									"value": "grh"
+								},
+								{
+									"key": "patient",
+									"value": "id-{{spid}}.{{arid}}.{{profile}}"
+								},
+								{
+									"key": "patient",
+									"value": "{{grhExternalID}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DocumentReference",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "ApplicationId",
+								"value": "{{application_id}}",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://{{server}}:{{port}}/fhir/stu3/DocumentReference?_list=grh&patient=id-{{spid}}.{{arid}}.{{profile}}",
+							"protocol": "http",
+							"host": [
+								"{{server}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"fhir",
+								"stu3",
+								"DocumentReference"
+							],
+							"query": [
+								{
+									"key": "_list",
+									"value": "grh"
+								},
+								{
+									"key": "patient",
+									"value": "id-{{spid}}.{{arid}}.{{profile}}"
+								},
+								{
+									"key": "patient",
+									"value": "{{grhExternalID}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Goal",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{server}}:{{port}}/fhir/stu3/Goal?_list=grh&patient=id-{{spid}}.{{arid}}.{{profile}}",
+							"protocol": "http",
+							"host": [
+								"{{server}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"fhir",
+								"stu3",
+								"Goal"
+							],
+							"query": [
+								{
+									"key": "_list",
+									"value": "grh"
+								},
+								{
+									"key": "patient",
+									"value": "id-{{spid}}.{{arid}}.{{profile}}"
+								},
+								{
+									"key": "patient",
+									"value": "{{grhExternalID}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Immunization",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{server}}:{{port}}/fhir/stu3/Immunization?_list=grh&patient=id-{{spid}}.{{arid}}.{{profile}}",
+							"protocol": "http",
+							"host": [
+								"{{server}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"fhir",
+								"stu3",
+								"Immunization"
+							],
+							"query": [
+								{
+									"key": "_list",
+									"value": "grh"
+								},
+								{
+									"key": "patient",
+									"value": "id-{{spid}}.{{arid}}.{{profile}}"
+								},
+								{
+									"key": "patient",
+									"value": "{{grhExternalID}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "MedicationAdministration",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{server}}:{{port}}/fhir/stu3/MedicationAdministration?_list=grh&patient=id-{{spid}}.{{arid}}.{{profile}}",
+							"protocol": "http",
+							"host": [
+								"{{server}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"fhir",
+								"stu3",
+								"MedicationAdministration"
+							],
+							"query": [
+								{
+									"key": "_list",
+									"value": "grh"
+								},
+								{
+									"key": "patient",
+									"value": "id-{{spid}}.{{arid}}.{{profile}}"
+								},
+								{
+									"key": "patient",
+									"value": "{{grhExternalID}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "MedicationRequest",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{server}}:{{port}}/fhir/stu3/MedicationRequest?_list=grh&patient=id-{{spid}}.{{arid}}.{{profile}}",
+							"protocol": "http",
+							"host": [
+								"{{server}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"fhir",
+								"stu3",
+								"MedicationRequest"
+							],
+							"query": [
+								{
+									"key": "_list",
+									"value": "grh"
+								},
+								{
+									"key": "patient",
+									"value": "id-{{spid}}.{{arid}}.{{profile}}"
+								},
+								{
+									"key": "patient",
+									"value": "{{grhExternalID}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "MedicationStatement",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{server}}:{{port}}/fhir/stu3/MedicationStatement?_list=grh&patient=id-{{spid}}.{{arid}}.{{profile}}",
+							"protocol": "http",
+							"host": [
+								"{{server}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"fhir",
+								"stu3",
+								"MedicationStatement"
+							],
+							"query": [
+								{
+									"key": "_list",
+									"value": "grh"
+								},
+								{
+									"key": "patient",
+									"value": "id-{{spid}}.{{arid}}.{{profile}}"
+								},
+								{
+									"key": "patient",
+									"value": "{{grhExternalID}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Observation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{server}}:{{port}}/fhir/stu3/Observation?_list=grh&patient=id-{{spid}}.{{arid}}.{{profile}}",
+							"protocol": "http",
+							"host": [
+								"{{server}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"fhir",
+								"stu3",
+								"Observation"
+							],
+							"query": [
+								{
+									"key": "_list",
+									"value": "grh"
+								},
+								{
+									"key": "patient",
+									"value": "id-{{spid}}.{{arid}}.{{profile}}"
+								},
+								{
+									"key": "patient",
+									"value": "{{grhExternalID}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Practitioner",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{server}}:{{port}}/fhir/stu3/Practitioner?_list=grh&patient=id-{{spid}}.{{arid}}.{{profile}}",
+							"protocol": "http",
+							"host": [
+								"{{server}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"fhir",
+								"stu3",
+								"Practitioner"
+							],
+							"query": [
+								{
+									"key": "_list",
+									"value": "grh"
+								},
+								{
+									"key": "patient",
+									"value": "id-{{spid}}.{{arid}}.{{profile}}"
+								},
+								{
+									"key": "patient",
+									"value": "{{grhExternalID}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Procedure",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"name": "Content-Type",
+								"value": "application/xml+fhir",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/xml+fhir",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://{{server}}:{{port}}/fhir/stu3/Procedure?_list=grh&patient=id-{{spid}}.{{arid}}.{{profile}}",
+							"protocol": "http",
+							"host": [
+								"{{server}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"fhir",
+								"stu3",
+								"Procedure"
+							],
+							"query": [
+								{
+									"key": "_list",
+									"value": "grh"
+								},
+								{
+									"key": "patient",
+									"value": "id-{{spid}}.{{arid}}.{{profile}}"
+								},
+								{
+									"key": "patient",
+									"value": "{{grhExternalID}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ProcedureRequest",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/xml+fhir",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/xml+fhir",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://{{server}}:{{port}}/fhir/stu3/ProcedureRequest?_list=grh&patient=id-{{spid}}.{{arid}}.{{profile}}",
+							"protocol": "http",
+							"host": [
+								"{{server}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"fhir",
+								"stu3",
+								"ProcedureRequest"
+							],
+							"query": [
+								{
+									"key": "_list",
+									"value": "grh"
+								},
+								{
+									"key": "patient",
+									"value": "id-{{spid}}.{{arid}}.{{profile}}"
+								},
+								{
+									"key": "patient",
+									"value": "{{grhExternalID}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{bearer_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "bearer_token",
+			"value": ""
+		},
+		{
+			"key": "user_token",
+			"value": ""
+		},
+		{
+			"key": "system_client_secret",
+			"value": "ac3fe856-5869-453e-a36b-5554ea5918dc"
+		},
+		{
+			"key": "system_client_id",
+			"value": "cpsi"
+		},
+		{
+			"key": "server",
+			"value": "10.14.50.37"
+		},
+		{
+			"key": "port",
+			"value": "4702"
+		},
+		{
+			"key": "spid",
+			"value": "1"
+		},
+		{
+			"key": "arid",
+			"value": "1"
+		},
+		{
+			"key": "profile",
+			"value": "1375"
+		},
+		{
+			"key": "visit",
+			"value": "E0000607"
+		},
+		{
+			"key": "grhExternalID",
+			"value": "beeaa129-2377-493d-afba-3a7f647b9da2"
+		}
+	]
+}

@@ -7,6 +7,6 @@ export class CollectionParamsComponent extends LitElement {
 
   // Implement `render` to define a template for your element.
   render() {
-    return html`template`;
+    return html``;
   }
 }
