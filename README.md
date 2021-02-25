@@ -10,8 +10,8 @@
 ```
 
 3. Navigate to Directory and run `docker-compose up`
-4. Navigate to `app.thrivefhirhealth.io/demo`: CLIENT
-   1. NGINX Reverse Proxy: Pass --> `localhost:1452/demo` CLIENT
+4. Navigate to `app.thrivefhirhealth.io`: CLIENT
+   1. NGINX Reverse Proxy: Pass --> `localhost:1452` CLIENT
 5. Navigate to `api.thrivefhirhealth.io/greeting`: Web API Endpoint
    1. NGINX Reverse Proxy: Pass --> `localhost:4242/greeting` Web API Endpoint
 

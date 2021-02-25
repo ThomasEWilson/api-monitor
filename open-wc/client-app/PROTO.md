@@ -12,6 +12,12 @@ Which css theme variables are used: see `component.ts` css section of each compo
 *<>* syntax refers to MWC Component Classes
 only implementing idempotent requests for MVP.
 
+Reference Syntax:
+<client-app .title=${title}
+            @click=${this.myMethod}>
+</client-app>
+// @click=${this.increment}
+
 App {
 
 *Top App Bar Fixed* {

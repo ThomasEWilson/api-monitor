@@ -14,7 +14,8 @@
     "sourceMap": true,
     "inlineSources": true,
     "rootDir": "./",
-    "declaration": true
+    "declaration": true,
+    "allowUnusedLabels": true
   },
   "include": ["**/*.ts"]
 }

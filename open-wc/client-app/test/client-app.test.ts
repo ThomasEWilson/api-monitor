@@ -19,7 +19,9 @@ describe('ClientApp', () => {
   });
 
   it('can override the title via attribute', async () => {
-    const el = await fixture<ClientApp>(html`<client-app title="attribute title"></client-app>`);
+    const el = await fixture<ClientApp>(
+      html`<client-app title="attribute title"></client-app>`
+    );
 
     expect(el.title).to.equal('attribute title');
   });

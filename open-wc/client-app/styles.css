@@ -1,0 +1,53 @@
+@import "https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css";
+
+/* .content class is multi purpose for  
+<p> paragraphs
+<ul> <ol> <dl> lists
+<h1> to <h6> headings
+<blockquote> quotes
+<em> and <strong>
+<table> <tr> <th> <td>
+
+.block simple spacer with good margins.
+
+.box: floating container with tasteful shadow
+
+.section {
+    .container { 
+        flex grow, margin 0 auto, position rel, width: auto.
+    }
+}
+
+button-state: .is-loading, is-outlined, [disabled]
+
+columns: Can have variable gaps.
+is-three-quarters
+is-two-thirds
+is-half
+is-one-third
+is-one-quarter
+is-full
+
+is-four-fifths
+is-three-fifths
+is-two-fifths
+is-one-fifth
+
+.columns {
+    .column
+   ?.column
+   .columns {
+        .column
+   }
+} 
+*/
+
+html {
+    /* --mdc-theme-primary: #6200ee;
+    --mdc-theme-secondary: #018786; */
+    --mdc-icon-font: 'Material Icons Outlined';
+}
+body {
+    background: #fafafa;
+}
+
