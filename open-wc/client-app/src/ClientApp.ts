@@ -17,18 +17,22 @@ export class ClientApp extends LitElement {
 
   render() {
     return html`
-      <!-- <client-app > -->
       <mwc-top-app-bar-fixed centerTitle>
         <mwc-icon-button icon="menu" slot="navigationIcon"></mwc-icon-button>
         <div slot="title">FHIR Health Monitor</div>
-        <mwc-icon-button icon="favorite" slot="actionItems"></mwc-icon-button>
+        <mwc-icon-button icon="settings" slot="actionItems"></mwc-icon-button>
         <!-- Collection Variables component will show and hide via bulma magic from top bar. -->
       </mwc-top-app-bar-fixed>
+      <!-- Main App Window Routing can occur here.
+           i.e. conditionally swap out <api-monitor-component> with others
+           to simulate web-page routing.
+            - For the prototype, I'll have by itself.
+        -->
+      <api-monitor-component class="columns is-full"></api-monitor-component>
       <!-- API MONITOR
             collection-variables-component
             endpoint-list-component
         -->
-      <!-- </client-app> -->
     `;
   }
 }

@@ -20,18 +20,18 @@
 
 button-state: .is-loading, is-outlined, [disabled]
 
-columns: Can have variable gaps.
-is-three-quarters
-is-two-thirds
-is-half
-is-one-third
-is-one-quarter
-is-full
+.columns: (Can have variable gaps.)
+    &.is-three-quarters
+    &.is-two-thirds
+    &.is-half
+    &.is-one-third
+    &.is-one-quarter
+    &.is-full
 
-is-four-fifths
-is-three-fifths
-is-two-fifths
-is-one-fifth
+    &.is-four-fifths
+    &.is-three-fifths
+    &.is-two-fifths
+    &.is-one-fifth
 
 .columns {
     .column

@@ -5,6 +5,8 @@ export class EndpointListComponent extends LitElement {
     return css``;
   }
 
+  // Mat-icon (retry endpoint): refresh
+  // Mat-icon (show drawer): expand_more
   // Implement `render` to define a template for your element.
   render() {
     return html`
